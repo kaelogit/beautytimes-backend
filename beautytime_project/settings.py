@@ -16,7 +16,12 @@ SECRET_KEY = 'django-insecure-@8^v3!m9f*+!06%n&h#j%2m2!63t09n91_p$v43d0i01d7+u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'beautytimes-backend.onrender.com', # <--- YOUR RENDER DOMAIN
+    '.onrender.com' # Optional: Allow any render subdomain
+]
 
 
 # Application definition
