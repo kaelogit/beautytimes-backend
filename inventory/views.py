@@ -30,10 +30,13 @@ def get_products_api(request):
         # GATHER ALL IMAGE URLs FOR THE GALLERY
         image_records = ProductImage.objects.filter(product=product)
         
-        product_dict['image_gallery'] = [
-            {'url': img.image_url, 'is_main': img.is_main} 
-            for img in image_records
-        ]
+        product_dict['image_gallery'] = []
+        for img in image_records:
+            if img.image:
+                product_dict['image_gallery'].append({
+                    'url': img.image.url, 
+                    'is_main': img.is_main
+                })
         
         # Determine the main image URL for the main card display
         main_image = next((img for img in product_dict['image_gallery'] if img['is_main']), None)

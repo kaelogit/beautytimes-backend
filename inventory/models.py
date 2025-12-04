@@ -55,15 +55,14 @@ class ProductImage(models.Model):
         related_name='images', 
         on_delete=models.CASCADE
     )
-    image_url = models.CharField(max_length=500)    
-    is_main = models.BooleanField(default=False) # To distinguish the primary image
+    image = models.ImageField(upload_to='products/') 
+    is_main = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Product Image"
         
     def __str__(self):
         return f"Image for {self.product.title}"
-
 
 class Subscriber(models.Model):
     email = models.EmailField(unique=True) # Unique ensures no duplicate emails
