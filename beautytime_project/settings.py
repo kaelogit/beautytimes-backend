@@ -1,6 +1,7 @@
 import dj_database_url
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -74,8 +75,8 @@ WSGI_APPLICATION = 'beautytime_project.wsgi.application'
 
 # Database
 DATABASES = {
-    'default': dj_database_url.parse(
-        'postgresql://neondb_owner:npg_Lkzpt4A1oRSW@ep-delicate-wildflower-ago0etf7-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require',
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'), # <--- Now it reads the variable!
         conn_max_age=600,
         conn_health_checks=True,
     )
