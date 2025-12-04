@@ -1,26 +1,28 @@
-import dj_database_url
 import os
 from pathlib import Path
+import dj_database_url
 from dotenv import load_dotenv
 
-# Load environment variables
+# 1. Load environment variables from .env file (for local development)
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@8^v3!m9f*+!06%n&h#j%2m2!63t09n91_p$v43d0i01d7+u'
+# This reads from Render environment or your .env file
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key-for-dev')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Set to TRUE if testing locally to see errors, FALSE for live Render deployment
+# Set this to False when deploying to Render
 DEBUG = False 
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'beautytimes-backend.onrender.com',
-    '.onrender.com'
+    'beautytimes-backend.onrender.com', # Your Render URL
+    '.onrender.com' # Allows all Render subdomains
 ]
 
 
@@ -34,19 +36,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Third party apps
-    'cloudinary_storage', 
+    # Third Party Apps (Crucial for Images & Connection)
+    'cloudinary_storage',  # Must be above cloudinary
     'cloudinary',
-    'corsheaders', # <--- ADDED THIS (Critical Fix)
+    'corsheaders',         # For frontend connection
 
-    # My custom apps
+    # My Custom Apps
     'inventory', 
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Needed for files on Render
-    'corsheaders.middleware.CorsMiddleware',      # Needed for Frontend connection
+    'whitenoise.middleware.WhiteNoiseMiddleware', # <--- Serves CSS/JS on Render
+    'corsheaders.middleware.CorsMiddleware',      # <--- Allows Netlify to talk to Django
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -77,6 +79,7 @@ WSGI_APPLICATION = 'beautytime_project.wsgi.application'
 
 
 # Database
+# Automatically handles Neon (on Render) and .env (Locally)
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
@@ -110,38 +113,43 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images, etc.)
-# --- CRITICAL STATIC FILE CONFIGURATION ---
+# --- STATIC & MEDIA CONFIGURATION (Django 5.0+ Style) ---
 
-# 1. URL to access static files in the browser
+# 1. Static Files (CSS, JavaScript) -> Served by Whitenoise
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# 2. Storage engine for Render (UNCOMMENTED THIS IS CRITICAL)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# 3. Directories where Django should look for static files inside apps
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'inventory', 'static'),
 ]
 
-# 4. Destination for collected static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Media Configuration (Cloudinary)
-MEDIA_URL = '/media/'
+# 2. Media Files (Images Uploaded by You) -> Served by Cloudinary
+MEDIA_URL = '/media/' 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# 3. Storage Engine Configuration
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
-# --- CORS Configuration ---
-CORS_ALLOW_ALL_ORIGINS = True
-
-# --- Cloudinary Configuration ---
+# --- Cloudinary Keys ---
+# Replace these with your ACTUAL keys from the Cloudinary Dashboard
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dcohh6ywb', 
     'API_KEY': '721365887418313', 
     'API_SECRET': 'DDdZDqXn12_SEwngY_-_xsWk3-Y',
 }
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# --- CORS Configuration ---
+# Allows your Netlify frontend to access the API
+CORS_ALLOW_ALL_ORIGINS = True
+
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
