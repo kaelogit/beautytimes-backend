@@ -115,7 +115,7 @@ USE_TZ = True
 
 # 1. URL to access static files in the browser
 STATIC_URL = 'static/'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # 2. Directories where Django should look for static files inside apps
 # Uses os.path.join for guaranteed path compatibility across all operating systems (Windows/Linux/Mac)

@@ -11,6 +11,3 @@ urlpatterns = [
     path('', include('inventory.urls')), 
 ]
 
-# CRITICAL FIX: Ensure static() returns a list and adds to the list
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
