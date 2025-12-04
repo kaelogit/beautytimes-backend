@@ -3,25 +3,24 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-@8^v3!m9f*+!06%n&h#j%2m2!63t09n91_p$v43d0i01d7+u'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# Set to TRUE if testing locally to see errors, FALSE for live Render deployment
+DEBUG = False 
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'beautytimes-backend.onrender.com', # <--- YOUR RENDER DOMAIN
-    '.onrender.com' # Optional: Allow any render subdomain
+    'beautytimes-backend.onrender.com',
+    '.onrender.com'
 ]
 
 
@@ -37,7 +36,8 @@ INSTALLED_APPS = [
     
     # Third party apps
     'cloudinary_storage', 
-    'cloudinary',        
+    'cloudinary',
+    'corsheaders', # <--- ADDED THIS (Critical Fix)
 
     # My custom apps
     'inventory', 
@@ -45,8 +45,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Needed for files on Render
+    'corsheaders.middleware.CorsMiddleware',      # Needed for Frontend connection
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'beautytime_project.wsgi.application'
 # Database
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'), # <--- Now it reads the variable!
+        default=os.environ.get('DATABASE_URL'),
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -115,31 +115,33 @@ USE_TZ = True
 
 # 1. URL to access static files in the browser
 STATIC_URL = 'static/'
-#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# 2. Directories where Django should look for static files inside apps
-# Uses os.path.join for guaranteed path compatibility across all operating systems (Windows/Linux/Mac)
+# 2. Storage engine for Render (UNCOMMENTED THIS IS CRITICAL)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# 3. Directories where Django should look for static files inside apps
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'inventory', 'static'),
 ]
 
-# 3. Destination for collected static files (Used when deploying)
+# 4. Destination for collected static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Media Configuration (Cloudinary)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# --- CORS Configuration for Local Development ---
+# --- CORS Configuration ---
 CORS_ALLOW_ALL_ORIGINS = True
 
+# --- Cloudinary Configuration ---
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'dcohh6ywb', 
     'API_KEY': '721365887418313', 
     'API_SECRET': 'DDdZDqXn12_SEwngY_-_xsWk3-Y',
 }
 
-# Tell Django to store uploaded images in Cloudinary
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
